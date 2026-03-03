@@ -7,7 +7,7 @@ class GuestMiddleware
     public function handle()
     {
         if (auth()) {
-            redirect('/notes');
+            redirect('/contacts');
         }
     }
 }

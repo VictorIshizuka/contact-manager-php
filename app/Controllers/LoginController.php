@@ -9,7 +9,7 @@ class LoginController
 {
     public function index()
     {
-        return view('login');
+        return view('auth/login');
     }
 
     public function login()
@@ -20,7 +20,7 @@ class LoginController
         ], request()->all());
 
         if ($validation->isInvalid()) {
-            return view('login');
+            return view('auth/login');
         }
 
         $user = User::findByEmail(request()->post('email'));
@@ -28,13 +28,13 @@ class LoginController
         if (empty($user) || ! password_verify(request()->post('password'), $user->password)) {
             flash()->push('validation_login', ['Usuário ou senha estão incorretos!']);
 
-            return view('login');
+            return view('auth/login');
         }
 
         session()->set('auth', $user);
 
         flash()->push('message', 'Seja bem-vindo, '.$user->name.'!');
 
-        return redirect('notes');
+        return redirect(uri: 'contacts');
     }
 }

@@ -9,7 +9,7 @@ class RegisterController
 {
     public function index()
     {
-        return view('register');
+        return view('auth/register');
     }
 
     public function register()
@@ -21,7 +21,7 @@ class RegisterController
         ], request()->all());
 
         if ($validation->isInvalid()) {
-            return view('register');
+            return view('auth/register');
         }
 
         User::create(request()->all());
