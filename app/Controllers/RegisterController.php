@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\User;
 use Core\Validation;
+use Exception;
 
 class RegisterController
 {
@@ -14,20 +15,25 @@ class RegisterController
 
     public function register()
     {
-        $validation = Validation::validate([
-            'name' => ['required'],
-            'email' => ['required', 'email', 'confirmed', 'unique:users'],
-            'password' => ['required', 'min:8', 'max:30', 'strong'],
-        ], request()->all());
+        try {
 
-        if ($validation->isInvalid()) {
-            return view('auth/register');
+            $validation = Validation::validate([
+                'name' => ['required'],
+                'email' => ['required', 'email', 'unique:users'],
+                'password' => ['required', 'min:8', 'max:30', 'strong', 'confirmed'],
+            ], request()->all());
+
+            if ($validation->isInvalid()) {
+                return view('auth/register');
+            }
+
+            User::create(request()->all());
+
+            flash()->push('message', 'Registrado com sucesso! 👍');
+
+            return redirect('/login');
+        } catch (Exception $e) {
+            dd($e->getMessage());
         }
-
-        User::create(request()->all());
-
-        flash()->push('message', 'Registrado com sucesso! 👍');
-
-        return redirect('/login');
     }
 }

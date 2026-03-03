@@ -1,0 +1,1 @@
+<h1 class="text-lg font-bold mt-2 p-2">Erro 404: Página não encontrada... Perdão</h1>

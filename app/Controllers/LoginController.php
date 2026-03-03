@@ -35,6 +35,6 @@ class LoginController
 
         flash()->push('message', 'Seja bem-vindo, '.$user->name.'!');
 
-        return redirect(uri: 'contacts');
+        return redirect( '/contacts');
     }
 }
