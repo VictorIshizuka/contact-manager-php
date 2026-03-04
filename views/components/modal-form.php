@@ -4,9 +4,12 @@
       <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
     </form>
 
-    <h3 class="font-bold text-lg mb-6">Adicionar contato</h3>
+    <h3 id="modal-title" class="font-bold text-lg mb-6">Adicionar contato</h3>
 
     <form id="contact-form" action="/contacts" method="POST" enctype="multipart/form-data" class="space-y-4">
+      <input type="hidden" name="id" id="contact-id">
+      <input type="hidden" name="__method" id="form-method" value="POST">
+      <input type="hidden" name="current_avatar" id="current-avatar">
       <div class="flex flex-col items-center gap-2 mb-4">
         <div class="avatar">
           <div class="w-20 h-20 rounded-2xl border-2 border-dashed border-white/20 flex items-center justify-center bg-black/20 group hover:border-lime-400 transition-all cursor-pointer relative overflow-hidden">

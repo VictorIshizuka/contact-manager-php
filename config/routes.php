@@ -18,6 +18,6 @@ use Core\Route;
     ->get('/logout', LogoutController::class, AuthMiddleware::class)
 
     ->post('/contacts', [ContactController::class, 'store'], AuthMiddleware::class)
-    ->put('/contacts', [ContactController::class, 'update'], AuthMiddleware::class)
-    ->delete('/contacts', [ContactController::class, 'destroy'], AuthMiddleware::class)
+    ->put('/contacts/update', [ContactController::class, 'update'], AuthMiddleware::class)
+    ->delete('/contacts/delete', [ContactController::class, 'destroy'], AuthMiddleware::class)
     ->run();

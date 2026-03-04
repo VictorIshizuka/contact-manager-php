@@ -99,13 +99,13 @@
                       <td class="hidden xl:table-cell text-xs opacity-40 truncate max-w-[150px]"><?= $c->email ?></td>
                       <td class="text-right rounded-r-2xl">
                         <div class="flex justify-end gap-4">
-                          <button class="btn btn-xs btn-ghost p-2 hover:text-lime-400 hover:bg-lime-400/10 rounded-xl">
+                          <button onclick='editContact(<?= json_encode($c) ?>)' class="btn btn-xs btn-ghost p-2 hover:text-lime-400 hover:bg-lime-400/10 rounded-xl">
                             <i class="ph ph-pencil-simple text-base"></i>
                           </button>
                           <button class="btn btn-xs btn-ghost p-2 hover:text-lime-400 hover:bg-lime-400/10 rounded-xl">
                             <i class="ph ph-lock text-base"></i>
                           </button>
-                          <button class="btn btn-xs btn-ghost p-2 hover:text-red-400 hover:bg-red-400/10 rounded-xl">
+                          <button onclick="deleteContact(<?= $c->id ?>, '<?= $c->name ?>')" class="btn btn-xs btn-ghost p-2 hover:text-red-400 hover:bg-red-400/10 rounded-xl">
                             <i class="ph ph-trash text-base"></i>
                           </button>
                         </div>

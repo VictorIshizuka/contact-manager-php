@@ -57,44 +57,67 @@ class ContactController
 
   public function update()
   {
+    $id = request()->post('id');
 
-    $validation = Validation::validate(
-      [
-        'name' => ['required', 'min:3', 'max:100'],
-        'phone' => ['required'], // deve conter apenas numeros dentro da string
-        'email' => ['required', 'unique:contatcs']
-      ],
-      request()->all()
-    );
+    if (!$id) {
+      return json(['success' => false, 'message' => 'ID do contato não encontrado.'], 400);
+    }
+
+    $validation = Validation::validate([
+      'name' => ['required', 'min:3', 'max:100'],
+      // 'phone' => ['required', 'unique:contacts'],
+      // 'email' => ['required', 'email', 'unique:contacts']
+    ], request()->all());
+
 
     if ($validation->isInvalid()) {
-      return view('contacts/create');
+      return json(['success' => false, 'errors' => $validation->errors()], 422);
     }
 
-    $files = request()->files('avatar');
+    $image = request()->post('current_avatar');
+    $file = request()->files('avatar');
 
-    if (isset($files)) {
-      $existAvatar = true;
 
-      $fileName = md5(rand());
-      $extension = pathinfo($files['name'], PATHINFO_EXTENSION);
-      $image = "images/$fileName.$extension";
+    if ($file && $file['tmp_name']) {
+      $fileName = md5(uniqid()) . "." . pathinfo($file['name'], PATHINFO_EXTENSION);
+      $destination = base_path("public/images/" . $fileName);
+      $imagePath = "images/" . $fileName;
 
-      $destination = __DIR__ . "../../public/" . $image;
+      if (move_uploaded_file($file['tmp_name'], $destination)) {
+        $image = $imagePath;
+      }
     }
 
-    $existAvatar = false;
+    Contact::update([
+      'id'     => $id,
+      'name'   => request()->post('name'),
+      'phone'  => request()->post('phone'),
+      'email'  => request()->post('email'),
+      'avatar' => $image
+    ]);
 
-    if ($existAvatar || move_uploaded_file($files['tmp_name'], $destination)) {
-
-      Contact::create([...request()->all(), $image]);
-
-      flash()->push('message', 'Contato atualizado com sucesso!');
-      return redirect('/contacts');
-    } else {
-      flash()->push('contatcs', 'Falha ao salvar a imagem!');
-      return view('contacts/create');
-    }
+    return json([
+      'success' => true,
+      'message' => 'Contato salvo!',
+      'contact' => [
+        'name' => request()->post('name'),
+        'phone' => request()->post('phone'),
+        'email' => request()->post('email'),
+        'avatar' => $image,
+        'first_letter' => strtoupper(substr(request()->post('name'), 0, 1))
+      ]
+    ]);
   }
-  public function delete() {}
+  public function destroy()
+  {
+    $id = request()->post('id');
+
+    if (!$id) {
+      return json(['success' => false, 'message' => 'ID não fornecido'], 400);
+    }
+
+    Contact::delete($id);
+
+    return json(['success' => true, 'message' => 'Contato excluído com sucesso!']);
+  }
 }

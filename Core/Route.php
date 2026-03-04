@@ -60,6 +60,7 @@ class Route
         $uri = parse_url($_SERVER['REQUEST_URI'])['path'];
 
         $httpMethod = request()->post('__method', $_SERVER['REQUEST_METHOD']);
+        $httpMethod = strtoupper($httpMethod);
 
         if (! isset($this->routes[$httpMethod][$uri])) {
             abort(404);

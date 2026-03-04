@@ -85,35 +85,35 @@ class Contact
   {
     $database = new Database((config('database')));
 
-    $set = 'name = :name';
+    $set = 'name = :name, updated_at = :updated_at';
 
-    if ($data['phone']) {
+    $params = [
+      'id' => $data['id'],
+      'name' => $data['name'],
+      'updated_at' => Carbon::now()->toDateTimeString()
+    ];
 
+    // Adição condicional de campos
+    if (!empty($data['phone'])) {
       $set .= ', phone = :phone';
+      $params['phone'] = $data['phone'];
     }
 
-    if ($data['email']) {
-
+    if (!empty($data['email'])) {
       $set .= ', email = :email';
+      $params['email'] = $data['email'];
     }
 
-    if ($data['avatar']) {
+    if (!empty($data['avatar'])) {
       $set .= ', avatar = :avatar';
+      $params['avatar'] = $data['avatar'];
     }
 
     return $database->query(
       "UPDATE contacts
             SET $set
             WHERE id = :id",
-      params: array_merge(
-        [
-          'name' => $data['name'],
-          'id' => $data['id'],
-        ],
-        $data['email'] ? ['email' => encrypt($data['email'])] : [],
-        $data['phone'] ? ['phone' => encrypt($data['phone'])] : [],
-        $data['avatar'] ? ['avatar' => $data['avatar']] : [],
-      )
+      params: $params
     );
   }
 
