@@ -18,4 +18,9 @@ class Request
     {
         return $_POST;
     }
+
+  public function files($key, $default = null, $prefix = null)
+    {
+        return isset($_FILES[$key]) ? ($prefix ?: null).$_FILES[$key] : $default;
+    }
 }
