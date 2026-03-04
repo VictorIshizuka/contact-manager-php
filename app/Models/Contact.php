@@ -17,6 +17,8 @@ class Contact
 
   public $user_id;
 
+  public $avatar;
+
   public $created_at;
 
   public $updated_at;
@@ -65,12 +67,14 @@ class Contact
     $database = new Database(config('database'));
 
     return $database->query(
-      'INSERT INTO contacts (name, email, password) VALUES (:name, :email, :password)',
+      'INSERT INTO contacts (name, email, phone, user_id, avatar, created_at, updated_at)
+        VALUES (:name, :email, :phone, :user_id, :avatar, :created_at, :updated_at)',
       params: [
-        'name' => $data['name'],
-        'email' => $data['email'],
-        'phone' => $data['phone'],
-        'user_id' => $data['user_id'],
+        'name'       => $data['name'],
+        'email'      => $data['email'],
+        'phone'      => $data['phone'],
+        'user_id'    => $data['user_id'],
+        'avatar'     => $data['avatar'],
         'created_at' => Carbon::now()->toDateTimeString(),
         'updated_at' => Carbon::now()->toDateTimeString(),
       ]
@@ -93,6 +97,10 @@ class Contact
       $set .= ', email = :email';
     }
 
+    if ($data['avatar']) {
+      $set .= ', avatar = :avatar';
+    }
+
     return $database->query(
       "UPDATE contacts
             SET $set
@@ -103,7 +111,8 @@ class Contact
           'id' => $data['id'],
         ],
         $data['email'] ? ['email' => encrypt($data['email'])] : [],
-        $data['phone'] ? ['phone' => encrypt($data['phone'])] : []
+        $data['phone'] ? ['phone' => encrypt($data['phone'])] : [],
+        $data['avatar'] ? ['avatar' => $data['avatar']] : [],
       )
     );
   }

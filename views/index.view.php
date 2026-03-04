@@ -4,20 +4,20 @@
     </div>
 
     <nav class="flex lg:flex-col gap-4 p-2 my-auto items-center justify-center">
-      <button class="btn btn-sm lg:btn-lg text-lime-400 border-lime-400/50 btn-square rounded-2xl bg-lime-400/10 hover:bg-lime-400 hover:text-black transition-all">
+      <a class="btn btn-sm lg:btn-lg text-lime-400 border-lime-400/50 btn-square rounded-2xl hover:text-lime-400 transition-all">
         <i class="ph ph-users-three text-xl lg:text-2xl"></i>
-      </button>
-      <button class="btn btn-sm lg:btn-lg btn-ghost btn-square opacity-40 hover:text-lime-400 hover:opacity-100 hover:border-lime-400 hover:shadow-[0_0_15px_rgba(163,230,53,0.3)] rounded-2xl transition-all">
+      </a>
+      <a class="btn btn-sm lg:btn-lg btn-ghost btn-square opacity-40 hover:text-lime-400 hover:opacity-100 hover:border-lime-400 hover:shadow-[0_0_15px_rgba(163,230,53,0.3)] rounded-2xl transition-all">
         <i class="ph ph-gear text-xl lg:text-2xl"></i>
-      </button>
-      <button class="btn btn-sm lg:btn-lg btn-ghost btn-square opacity-40 hover:text-lime-400 hover:border-lime-400 hover:opacity-100 hover:shadow-[0_0_15px_rgba(163,230,53,0.3)] rounded-2xl transition-all">
+      </a>
+      <a href="/logout" class="btn btn-sm lg:btn-lg btn-ghost btn-square opacity-40 hover:text-lime-400 hover:text-red-400 hover:opacity-100 hover:shadow-[0_0_15px_rgba(163,230,53,0.3)] rounded-2xl transition-all">
         <i class="ph ph-sign-out text-xl lg:text-2xl"></i>
-      </button>
+      </a>
     </nav>
 
     <div class="hidden lg:block absolute bottom-4 left-0 w-full text-center px-2">
       <p class="text-[9px] uppercase tracking-widest opacity-30 font-bold leading-tight truncate">
-        Logado como:<br>
+        Logado como: >
         <span class="text-white opacity-80 lowercase font-normal italic truncate block"><?= auth()->email ?></span>
       </p>
     </div>
@@ -30,13 +30,13 @@
         <h1 class="text-2xl lg:text-3xl font-bold whitespace-nowrap">Lista de contatos</h1>
 
         <div class="flex flex-col sm:flex-row flex-1 items-center gap-4 w-full xl:max-w-3xl justify-end">
-          <div class="relative w-full sm:flex-1">
-            <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 opacity-50"></i>
-            <input type="text" placeholder="Pesquisar contatos..." class="input input-bordered w-full pl-12 bg-[#161616] border-white/10 focus:border-lime-400 focus:outline-none transition-all" />
-          </div>
+          <form id="search-contacts" class="relative w-full sm:flex-1">
+            <i class="ph ph-magnifying-glass absolute left-4 top-7 -translate-y-1/2 opacity-50"></i>
+            <input type="text" placeholder="Pesquisar contatos..." class="input input-bordered w-full pl-12 bg-transparent border-white/10 focus:border-lime-400 focus:outline-none transition-all" />
+          </form>
 
           <div class="flex items-center gap-2 w-full sm:w-auto">
-            <button class="btn btn-md border-none px-6 hover:bg-lime-400 hover:text-[#111111] bg-[#303030] rounded-xl transition-all shadow-lg">
+            <button onclick="modal_contact.showModal()" class="btn btn-md border-none px-6 hover:bg-lime-400 hover:text-[#111111] bg-[#303030] rounded-xl transition-all shadow-lg">
               <i class="ph ph-plus"></i>
               <span class="inline">Novo</span>
             </button>
@@ -79,35 +79,42 @@
                 </tr>
               </thead>
               <tbody>
-                <?php foreach ($contacts as $c): ?>
-                  <tr class="hover:bg-white/[0.03] transition-all group border-none">
-                    <td class="rounded-l-2xl">
-                      <div class="flex items-center gap-3">
-                        <div class="avatar">
-                          <div class="mask mask-squircle w-10 h-10 shadow-md border border-white/5">
-                            <img src="<?= $c->img ?>" />
+                <?php if (count($contacts) > 0) { ?>
+                  <?php foreach ($contacts as $c): ?>
+                    <tr class="hover:bg-white/[0.03] transition-all group border-none">
+                      <td class="rounded-l-2xl">
+                        <div class="flex items-center gap-3">
+                          <div class="avatar">
+                            <div class="mask mask-squircle w-10 h-10 shadow-md border border-white/5">
+                              <img src="<?= $c->avatar ?>" />
+                            </div>
+                          </div>
+                          <div class="truncate">
+                            <div class="font-bold group-hover:text-lime-400 transition-all truncate text-sm"><?= $c->name ?></div>
+                            <div class="text-[9px] opacity-30 font-bold uppercase block sm:hidden italic">Mobile</div>
                           </div>
                         </div>
-                        <div class="truncate">
-                          <div class="font-bold group-hover:text-lime-400 transition-all truncate text-sm"><?= $c->name ?></div>
-                          <div class="text-[9px] opacity-30 font-bold uppercase block sm:hidden italic">Mobile</div>
+                      </td>
+                      <td class="hidden md:table-cell font-mono text-xs opacity-60 text-center"><?= $c->phone ?></td>
+                      <td class="hidden xl:table-cell text-xs opacity-40 truncate max-w-[150px]"><?= $c->email ?></td>
+                      <td class="text-right rounded-r-2xl">
+                        <div class="flex justify-end gap-4">
+                          <button class="btn btn-xs btn-ghost p-2 hover:text-lime-400 hover:bg-lime-400/10 rounded-xl">
+                            <i class="ph ph-pencil-simple text-base"></i>
+                          </button>
+                          <button class="btn btn-xs btn-ghost p-2 hover:text-lime-400 hover:bg-lime-400/10 rounded-xl">
+                            <i class="ph ph-lock text-base"></i>
+                          </button>
+                          <button class="btn btn-xs btn-ghost p-2 hover:text-red-400 hover:bg-red-400/10 rounded-xl">
+                            <i class="ph ph-trash text-base"></i>
+                          </button>
                         </div>
-                      </div>
-                    </td>
-                    <td class="hidden md:table-cell font-mono text-xs opacity-60 text-center"><?= $c->phone ?></td>
-                    <td class="hidden xl:table-cell text-xs opacity-40 truncate max-w-[150px]"><?= $c->email ?></td>
-                    <td class="text-right rounded-r-2xl">
-                      <div class="flex justify-end gap-1">
-                        <button class="btn btn-xs btn-ghost hover:text-lime-400 hover:bg-lime-400/10">
-                          <i class="ph ph-pencil-simple-bold text-base"></i>
-                        </button>
-                        <button class="btn btn-xs btn-ghost hover:text-error hover:bg-error/10">
-                          <i class="ph ph-trash-bold text-base"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                <?php endforeach; ?>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                <?php } else { ?>
+                  <span>Sem registros no momento.</span>
+                <?php } ?>
               </tbody>
             </table>
           </div>
@@ -115,6 +122,8 @@
       </div>
     </div>
   </main>
+
+  <?php require base_path('/views/components/modal-form.php') ?>
 
   <style>
     /* Remove a barra de rolagem visualmente mas mantém o scroll funcional */

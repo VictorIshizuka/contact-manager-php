@@ -12,5 +12,7 @@ email VARCHAR(255) NOT NULL,
 phone VARCHAR(255) NOT NULL,
 avatar VARCHAR(255),
 user_id INTEGER,
+created_at DATETIME,
+updated_at DATETIME,
 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

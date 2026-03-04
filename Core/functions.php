@@ -37,12 +37,19 @@ function dump(...$dump)
 }
 
 set_error_handler(function ($errno, $errstr, $errfile, $errline) {
-    echo "<pre>";
-    echo "Erro: $errstr\n";
-    echo "Arquivo: $errfile\n";
-    echo "Linha: $errline\n\n";
-    print_r(debug_backtrace());
-    echo "</pre>";
+    // Se for AJAX, responde em JSON para não quebrar o JS
+    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+        header('Content-Type: application/json');
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'errors' => ["php" => "Erro: $errstr em $errfile na linha $errline"]
+        ]);
+        exit;
+    }
+
+    // Se for acesso normal via navegador, mantém o seu log visual
+    echo "<pre>Erro: $errstr\nArquivo: $errfile\nLinha: $errline</pre>";
     exit;
 });
 

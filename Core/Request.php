@@ -19,9 +19,9 @@ class Request
         return $_POST;
     }
 
-    public function files($key, $default = null, $prefix = null)
+    public function files($key, $default = null)
     {
-        return isset($_FILES[$key]) ? ($prefix ?: null) . $_FILES[$key] : $default;
+        return $_FILES[$key] ?? $default;
     }
 
     public function isAjax()
