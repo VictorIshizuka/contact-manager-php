@@ -6,12 +6,12 @@ class Request
 {
     public function get($key, $default = null, $prefix = null)
     {
-        return isset($_GET[$key]) ? ($prefix ?: null).$_GET[$key] : $default;
+        return isset($_GET[$key]) ? ($prefix ?: null) . $_GET[$key] : $default;
     }
 
     public function post($key, $default = null, $prefix = null)
     {
-        return isset($_POST[$key]) ? ($prefix ?: null).$_POST[$key] : $default;
+        return isset($_POST[$key]) ? ($prefix ?: null) . $_POST[$key] : $default;
     }
 
     public function all()
@@ -19,8 +19,14 @@ class Request
         return $_POST;
     }
 
-  public function files($key, $default = null, $prefix = null)
+    public function files($key, $default = null, $prefix = null)
     {
-        return isset($_FILES[$key]) ? ($prefix ?: null).$_FILES[$key] : $default;
+        return isset($_FILES[$key]) ? ($prefix ?: null) . $_FILES[$key] : $default;
+    }
+
+    public function isAjax()
+    {
+        return isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower(string: $_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 }

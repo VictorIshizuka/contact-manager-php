@@ -13,6 +13,8 @@ function view($view, $data = [])
         $$key = $value;
     }
 
+    // $validations = flash()->get('validations') ?? [];
+
     require base_path('views/templates/html.php');
 }
 
@@ -111,6 +113,15 @@ function request()
 {
     return new Core\Request;
 }
+
+function json($data, $code = 200)
+{
+    header('Content-Type: application/json');
+    http_response_code($code);
+    echo json_encode($data);
+    exit;
+}
+
 
 function session()
 {

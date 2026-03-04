@@ -122,11 +122,19 @@ class Validation
 
         if ($customName) {
 
-            $key .= '_'.$customName;
+            $key .= '_' . $customName;
         }
 
-        flash()->push($key, $this->validations);
+        //usa push apenas se nao for ajax
+        if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+            flash()->push($key, $this->validations);
+        }
 
         return count($this->validations) > 0;
+    }
+
+    public function errors()
+    {
+        return $this->validations;
     }
 }

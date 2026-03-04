@@ -19,22 +19,22 @@ class LoginController
             'password' => ['required'],
         ], request()->all());
 
-        if ($validation->isInvalid()) {
-            return view('auth/login');
+        if (request()->isAjax()) {
+
+            if ($validation->isInvalid('login')) {
+                return json(['success' => false, 'errors' => $validation->errors()], 422);
+            }
+
+            $user = User::findByEmail(request()->post('email'));
+
+            if (empty($user) || ! password_verify(request()->post('password'), $user->password)) {
+                $errorMsg = ['Usuário ou senha estão incorretos!'];
+                return json(['success' => false, 'errors' => ['email' => $errorMsg]], 401);
+            }
+
+            session()->set('auth', $user);
+
+            return json(['success' => true, 'redirect' => '/contacts']);
         }
-
-        $user = User::findByEmail(request()->post('email'));
-
-        if (empty($user) || ! password_verify(request()->post('password'), $user->password)) {
-            flash()->push('validation_login', ['Usuário ou senha estão incorretos!']);
-
-            return view('auth/login');
-        }
-
-        session()->set('auth', $user);
-
-        flash()->push('message', 'Seja bem-vindo, '.$user->name.'!');
-
-        return redirect( '/contacts');
     }
 }

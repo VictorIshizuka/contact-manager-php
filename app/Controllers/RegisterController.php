@@ -15,25 +15,21 @@ class RegisterController
 
     public function register()
     {
-        try {
+        $validation = Validation::validate([
+            'name' => ['required'],
+            'email' => ['required', 'email', 'unique:users'],
+            'password' => ['required', 'min:8', 'max:30', 'strong', 'confirmed'],
+        ], request()->all());
 
-            $validation = Validation::validate([
-                'name' => ['required'],
-                'email' => ['required', 'email', 'unique:users'],
-                'password' => ['required', 'min:8', 'max:30', 'strong', 'confirmed'],
-            ], request()->all());
-
+        if (request()->isAjax()) {
             if ($validation->isInvalid()) {
-                return view('auth/register');
+                return json(['success' => false, 'errors' => $validation->errors()], 422);
             }
 
             User::create(request()->all());
 
-            flash()->push('message', 'Registrado com sucesso! 👍');
-
-            return redirect('/login');
-        } catch (Exception $e) {
-            dd($e->getMessage());
+            flash()->push('message', 'Registrado com sucesso!');
+            return json(['success' => true, 'redirect' => '/login']);
         }
     }
 }

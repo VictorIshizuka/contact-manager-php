@@ -19,16 +19,6 @@
 
     <!-- FORM -->
     <form action="/login" method="post" class="max-w-sm w-full space-y-6">
-      <?php if ($validation = flash()->get("validation_login")) { ?>
-        <div class="mx-2">
-          <div role="alert" class="alert alert-error mt-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span><?= $validation[0] ?></span>
-          </div>
-        </div>
-      <?php } ?>
 
       <h2 class="text-2xl font-semibold text-white text-center lg:text-left">
         Acessar conta
@@ -42,11 +32,7 @@
           <input type="email"
             name="email" value="<?= old('email') ?? '' ?>"
             placeholder="Digite seu e-mail"
-            class="w-full px-4 py-3 rounded-lg bg-transparent text-white border border-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 outline-none transition">
-          <?php if (isset($validations['email'])) { ?>
-            <div class="mt-1 text-xs text-error"><?= $validations['email'] ?></div>
-          <?php } ?>
-
+            class="input input-bordered pl-2  w-full bg-transparent text-white outline-none transition">
         </div>
 
         <!-- Senha -->
@@ -57,15 +43,12 @@
           <input type="password"
             name="password"
             placeholder="Insira sua senha"
-            class="w-full px-4 py-3 rounded-lg bg-transparent text-white border border-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 outline-none transition">
-          <?php if (isset($validations['password'])) { ?>
-            <div class="mt-1 text-xs text-error"><?= $validations['password'] ?></div>
-          <?php } ?>
+            class="input input-bordered pl-2  w-full bg-transparent text-white outline-none transition">
         </div>
 
         <!-- Botão -->
         <div class="pt-4 text-center lg:text-end">
-          <button
+          <button id="auth-btn"
             class="bg-lime-400 text-black font-medium px-6 py-3 rounded-xl w-full lg:w-auto transition hover:bg-lime-300">
             Acessar conta
           </button>

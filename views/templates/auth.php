@@ -38,4 +38,5 @@
   <!-- ======== LADO DIREITO / FORM ======== -->
   <?php require base_path("views/{$view}.view.php"); ?>
 
+  <script src="/assets/js/auth.js"></script>
 </body>
