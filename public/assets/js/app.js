@@ -1,147 +1,208 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // --- 1. SELETORES DE ELEMENTOS ---
   const contactForm = document.getElementById('contact-form');
-  if (!contactForm) return;
+  const confirmForm = document.getElementById('form-confirm-password');
+  if (!contactForm || !confirmForm) return;
 
-  const btn = document.getElementById('save-contact-btn');
-  const avatarInput = document.getElementById('avatar-input');
-  const avatarPreview = document.getElementById('avatar-preview');
-  const avatarPlaceholder = document.getElementById('avatar-placeholder');
+  const elements = {
+    btnSave: document.getElementById('save-contact-btn'),
+    avatarInput: document.getElementById('avatar-input'),
+    avatarPreview: document.getElementById('avatar-preview'),
+    avatarPlaceholder: document.getElementById('avatar-placeholder'),
+    confirmInput: document.getElementById('confirm-password-input'),
+    revealIdInput: document.getElementById('reveal-id'),
+    tableBody: document.querySelector('tbody'),
+    searchInput: document.querySelector('input[name="search"]')
+  };
 
+  // --- 2. AUXILIARES DE INTERFACE (UI) ---
   const ui = {
     setError: (input, message) => {
-      input.classList.remove('input-bordered', 'border-white/10');
       input.classList.add('input-error');
-
-      let container = input.parentNode.querySelector('.error-label');
-      if (!container) {
-        container = document.createElement('div');
-        container.className = 'label error-label py-0 mt-1';
-        container.innerHTML = `<span class="label-text-alt text-error font-bold text-[10px]"></span>`;
-        input.insertAdjacentElement('afterend', container);
-      }
-      container.querySelector('span').innerText = message;
+      let label = input.parentNode.querySelector('.error-label') || document.createElement('div');
+      label.className = 'label error-label py-0 mt-1';
+      label.innerHTML = `<span class="label-text-alt text-error font-bold text-[10px]">${message}</span>`;
+      if (!input.parentNode.querySelector('.error-label')) input.insertAdjacentElement('afterend', label);
     },
     clearError: (input) => {
-      input.classList.remove('input-error');
-      input.classList.add('input-bordered', 'border-white/10');
-      const container = input.parentNode.querySelector('.error-label');
-      if (container) container.remove();
+      input?.classList.remove('input-error');
+      input?.parentNode.querySelector('.error-label')?.remove();
+    },
+    resetForm: (form) => {
+      form.reset();
+      form.querySelectorAll('input').forEach(i => ui.clearError(i));
+    },
+    toggleAvatar: (src) => {
+      if (src) {
+        elements.avatarPreview.src = src;
+        elements.avatarPreview.classList.remove('hidden');
+        elements.avatarPlaceholder.classList.add('hidden');
+      } else {
+        elements.avatarPreview.classList.add('hidden');
+        elements.avatarPlaceholder.classList.remove('hidden');
+      }
+    },
+    setEditLock: (isLocked) => {
+      const fields = [contactForm.querySelector('[name="phone"]'), contactForm.querySelector('[name="email"]')];
+      fields.forEach(f => {
+        f.readOnly = isLocked;
+        isLocked ? f.setAttribute('disabled', 'disabled') : f.removeAttribute('disabled');
+        f.classList.toggle('opacity-50', isLocked);
+        f.classList.toggle('cursor-not-allowed', isLocked);
+      });
     }
   };
 
-  // --- FUNÇÕES GLOBAIS---
+  // --- 3. AÇÕES (WINDOW FUNCTIONS) ---
 
-  // 1. EDITAR: Preenche o modal com dados existentes
   window.editContact = (contact) => {
-    contactForm.reset();
+    ui.resetForm(contactForm);
     document.getElementById('modal-title').innerText = "Editar contato";
-
-    // Define a rota de Update
-    contactForm.action = "/contacts/update";
     document.getElementById('form-method').value = "PUT";
-    document.getElementById('contact-id').value = contact.id;
+    contactForm.action = "/contacts/update";
 
     document.getElementById('contact-id').value = contact.id;
-    document.getElementById('current-avatar').value = contact.avatar; // Campo hidden para manter imagem atual
-
+    document.getElementById('current-avatar').value = contact.avatar || '';
     contactForm.querySelector('[name="name"]').value = contact.name;
     contactForm.querySelector('[name="phone"]').value = contact.phone;
     contactForm.querySelector('[name="email"]').value = contact.email;
 
-    if (contact.avatar) {
-      avatarPreview.src = contact.avatar;
-      avatarPreview.classList.remove('hidden');
-      avatarPlaceholder.classList.add('hidden');
-    }
+    const isRowRevealed = document.querySelector(`button[onclick*="toggleReveal(${contact.id}"]`)?.getAttribute('data-revealed') === 'true';
+    ui.setEditLock(!(contact.is_decrypted || isRowRevealed));
+    ui.toggleAvatar(contact.avatar);
 
     modal_contact.showModal();
   };
 
-  // 2. DELETAR: Confirmação e post
-  window.deleteContact = async (id, name) => {
-    if (confirm(`Tem certeza que deseja excluir o contato "${name}"?`)) {
-      const formData = new FormData();
-      formData.append('id', id);
-      formData.append('__method', 'DELETE');
+  window.toggleReveal = (id, btn) => {
+    const isRevealed = btn.getAttribute('data-revealed') === 'true';
+    if (isRevealed) {
+      const row = btn.closest('tr');
+      const icon = document.getElementById(`lock-icon-${id}`);
+      const btnEdit = row.querySelector('button[onclick*="editContact"]');
 
-      try {
-        const response = await fetch('/contacts/delete', {
-          method: 'POST',
-          body: formData,
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        });
-        const result = await response.json();
-        if (result.success) window.location.reload();
-      } catch (error) {
-        alert("Erro ao excluir contato.");
+      row.querySelector('td:nth-child(2)').innerText = "(••) •••••-••••";
+      row.querySelector('td:nth-child(3)').innerText = "••••••••@••••.com";
+      icon.className = 'ph ph-lock text-base';
+      btn.setAttribute('data-revealed', 'false');
+
+      // Sincroniza dados "falsos" no botão de editar para segurança
+      const match = btnEdit.getAttribute('onclick').match(/editContact\((.*)\)/);
+      if (match) {
+        let data = JSON.parse(match[1]);
+        data.phone = "(••) •••••-••••";
+        data.email = "••••••••@••••.com";
+        data.is_decrypted = false;
+        btnEdit.setAttribute('onclick', `editContact(${JSON.stringify(data)})`);
       }
+    } else {
+      window.revealContact(id);
     }
   };
 
-  // --- EVENTOS ---
+  window.revealContact = (id) => {
+    ui.resetForm(confirmForm);
+    elements.revealIdInput.value = id;
+    confirmForm.action = "/contacts/reveal";
+    modal_confirm.showModal();
+  };
 
-  // Botão "Novo": Reseta o modal para criação
-  const btnNovo = document.querySelector('[onclick="modal_contact.showModal()"]');
-  if (btnNovo) {
-    btnNovo.addEventListener('click', (e) => {
-      contactForm.reset();
-      contactForm.action = "/contacts"; // Rota de Create
-      document.getElementById('contact-id').value = "";
-      document.getElementById('modal-title').innerText = "Adicionar contato";
-      avatarPreview.classList.add('hidden');
-      avatarPlaceholder.classList.remove('hidden');
+  window.openFullUnlock = () => {
+    ui.resetForm(confirmForm);
+    elements.revealIdInput.value = "";
+    confirmForm.action = "/contacts/show";
+    modal_confirm.showModal();
+  };
+
+  window.deleteContact = async (id, name) => {
+    if (!confirm(`Excluir "${name}"?`)) return;
+    const fd = new FormData();
+    fd.append('id', id);
+    fd.append('__method', 'DELETE');
+
+    const res = await fetch('/contacts/delete', { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    if ((await res.json()).success) window.location.reload();
+  };
+
+  // --- 4. EVENTOS ---
+
+  // Submit de Contato (Novo/Editar)
+  contactForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    elements.btnSave.disabled = true;
+
+    const res = await fetch(contactForm.action, {
+      method: 'POST',
+      body: new FormData(contactForm),
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
     });
-  }
+    const result = await res.json();
 
-  // Preview da Foto
-  avatarInput.addEventListener('change', function () {
-    const file = this.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        avatarPreview.src = e.target.result;
-        avatarPreview.classList.remove('hidden');
-        avatarPlaceholder.classList.add('hidden');
-      };
-      reader.readAsDataURL(file);
+    if (result.success) return window.location.reload();
+
+    Object.keys(result.errors || {}).forEach(f => {
+      const input = contactForm.querySelector(`[name="${f}"]`);
+      ui.setError(input, Array.isArray(result.errors[f]) ? result.errors[f][0] : result.errors[f]);
+    });
+    elements.btnSave.disabled = false;
+  });
+
+  // Confirmação de Senha
+  confirmForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const res = await fetch(confirmForm.action, {
+      method: 'POST',
+      body: new FormData(confirmForm),
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    const result = await res.json();
+
+    if (res.ok) {
+      if (elements.revealIdInput.value) {
+        const id = elements.revealIdInput.value;
+        const btnLock = document.querySelector(`button[onclick*="toggleReveal(${id}"]`);
+        const row = btnLock.closest('tr');
+        const btnEdit = row.querySelector('button[onclick*="editContact"]');
+
+        row.querySelector('td:nth-child(2)').innerText = result.phone;
+        row.querySelector('td:nth-child(3)').innerText = result.email;
+        btnLock.querySelector('i').className = 'ph-lock-open-fill text-lime-400';
+        btnLock.setAttribute('data-revealed', 'true');
+
+        const data = JSON.parse(btnEdit.getAttribute('onclick').match(/editContact\((.*)\)/)[1]);
+        data.phone = result.phone;
+        data.email = result.email;
+        data.is_decrypted = true;
+        btnEdit.setAttribute('onclick', `editContact(${JSON.stringify(data)})`);
+        modal_confirm.close();
+      } else {
+        window.location.reload();
+      }
+    } else {
+      ui.setError(elements.confirmInput, result.message || "Senha incorreta");
     }
   });
 
-  // Limpa erro ao digitar
-  contactForm.addEventListener('input', (e) => {
-    if (e.target.name) ui.clearError(e.target);
-  });
-
-  // Envio AJAX (Store e Update)
-  contactForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const originalText = btn.innerText;
-    btn.innerText = "Salvando...";
-    btn.disabled = true;
-
-    try {
-      const response = await fetch(contactForm.action, {
-        method: 'POST',
-        body: new FormData(contactForm),
+  // Pesquisa com Debounce
+  let searchTimeout;
+  elements.searchInput?.addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(async () => {
+      const letter = new URLSearchParams(window.location.search).get('letter') || '';
+      const res = await fetch(`/contacts?letter=${letter}&search=${e.target.value}`, {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
       });
+      const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+      elements.tableBody.innerHTML = doc.querySelector('tbody').innerHTML;
+    }, 300);
+  });
 
-      const result = await response.json();
-
-      if (result.success) {
-        window.location.reload();
-      } else {
-        Object.keys(result.errors).forEach(field => {
-          const input = contactForm.querySelector(`[name="${field}"]`);
-          const msg = Array.isArray(result.errors[field]) ? result.errors[field][0] : result.errors[field];
-          if (input) ui.setError(input, msg);
-        });
-        btn.innerText = originalText;
-        btn.disabled = false;
-      }
-    } catch (error) {
-      btn.innerText = "Erro na conexão";
-      btn.disabled = false;
+  // Preview Foto
+  elements.avatarInput.addEventListener('change', function () {
+    if (this.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => ui.toggleAvatar(e.target.result);
+      reader.readAsDataURL(this.files[0]);
     }
   });
 });
