@@ -120,4 +120,57 @@ class ContactController
 
     return json(['success' => true, 'message' => 'Contato excluído com sucesso!']);
   }
+
+  public function show()
+  {
+    $password = request()->post('password');
+
+    $validation = Validation::validate([
+      'password' => ['required'],
+    ], request()->all());
+
+    if ($validation->isInvalid()) {
+      return json(['success' => false, 'errors' => $validation->errors()], 422);
+    }
+
+    if (!password_verify($password, auth()->password)) {
+      return json(['success' => false, 'message' => 'Senha incorreta!'], 403);
+    }
+
+    session()->set('show_private_data', true);
+    return json(['success' => true]);
+  }
+
+  public function hidden()
+  {
+    session()->forget('show_private_data');
+    return redirect('/contacts');
+  }
+
+  public function revealIndividual()
+  {
+    $id = request()->post('reveal_id');
+    $password = request()->post('password');
+
+    if (!password_verify($password, auth()->password)) {
+      return json(['success' => false, 'message' => 'Senha incorreta!'], 403);
+    }
+
+    $database = new \Core\Database(config('database'));
+    $contact = $database->query(
+      'SELECT * FROM contacts WHERE id = :id AND user_id = :user_id',
+      Contact::class,
+      ['id' => $id, 'user_id' => auth()->id]
+    )->fetch();
+
+    if (!$contact) {
+      return json(['success' => false, 'message' => 'Contato não encontrado.'], 404);
+    }
+
+    return json([
+      'success' => true,
+      'email' => decrypt($contact->email),
+      'phone' => decrypt($contact->phone)
+    ]);
+  }
 }

@@ -20,4 +20,8 @@ use Core\Route;
     ->post('/contacts', [ContactController::class, 'store'], AuthMiddleware::class)
     ->put('/contacts/update', [ContactController::class, 'update'], AuthMiddleware::class)
     ->delete('/contacts/delete', [ContactController::class, 'destroy'], AuthMiddleware::class)
+
+    ->post('/contacts/show', [ContactController::class, 'show'], AuthMiddleware::class)
+    ->get('/contacts/hidden', [ContactController::class, 'hidden'], AuthMiddleware::class)
+    ->post('/contacts/reveal', [ContactController::class, 'revealIndividual'], AuthMiddleware::class)
     ->run();

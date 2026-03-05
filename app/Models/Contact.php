@@ -23,6 +23,22 @@ class Contact
 
   public $updated_at;
 
+  public function email()
+  {
+    if (session()->get('show_private_data')) {
+      return decrypt($this->email);
+    }
+    return "••••••••@••••.com";
+  }
+
+  public function phone()
+  {
+    if (session()->get('show_private_data')) {
+      return decrypt($this->phone);
+    }
+    return "(••) •••••-••••";
+  }
+
   public static function findByEmail($email)
   {
     $database = new Database(config('database'));
@@ -45,21 +61,25 @@ class Contact
     )->fetch();
   }
 
-  public static function all($search = null)
+  public static function all($search = null, $letter = null)
   {
     $database = new Database(config('database'));
+    $query = 'SELECT * FROM contacts WHERE user_id = :user_id';
+    $params = ['user_id' => auth()->id];
 
-    return $database->query(
-      'SELECT * FROM contacts WHERE user_id = :user_id' . (
-        $search ? ' AND name OR email OR phone LIKE :search' : ''
-      ),
-      self::class,
-      array_merge(
-        ['user_id' => auth()->id],
-        $search ? ['search' => "%$search%"] : []
-      )
+    if ($search) {
+      $query .= ' AND (name LIKE :search OR email LIKE :search OR phone LIKE :search)';
+      $params['search'] = "%$search%";
+    }
 
-    )->fetchAll();
+    if ($letter) {
+      $query .= ' AND name LIKE :letter';
+      $params['letter'] = "$letter%";
+    }
+
+    $query .= ' ORDER BY name ASC';
+
+    return $database->query($query, self::class, $params)->fetchAll();
   }
 
   public static function create($data)
@@ -71,8 +91,8 @@ class Contact
         VALUES (:name, :email, :phone, :user_id, :avatar, :created_at, :updated_at)',
       params: [
         'name'       => $data['name'],
-        'email'      => $data['email'],
-        'phone'      => $data['phone'],
+        'email'      => encrypt($data['email']),
+        'phone'      => encrypt($data['phone']),
         'user_id'    => $data['user_id'],
         'avatar'     => $data['avatar'],
         'created_at' => Carbon::now()->toDateTimeString(),
@@ -96,12 +116,12 @@ class Contact
     // Adição condicional de campos
     if (!empty($data['phone'])) {
       $set .= ', phone = :phone';
-      $params['phone'] = $data['phone'];
+      $params['phone'] = encrypt($data['phone']);
     }
 
     if (!empty($data['email'])) {
       $set .= ', email = :email';
-      $params['email'] = $data['email'];
+      $params['email'] = encrypt($data['email']);
     }
 
     if (!empty($data['avatar'])) {
@@ -132,5 +152,19 @@ class Contact
   public function updatedAt()
   {
     return Carbon::parse($this->updated_at);
+  }
+
+  public function toArray()
+  {
+    $show = session()->get('show_private_data');
+    return [
+      'id' => $this->id,
+      'name' => $this->name,
+      // Só envia o dado real para o JS se a sessão permitir
+      'phone' => $show ? decrypt($this->phone) : "(••) •••••-••••",
+      'email' => $show ? decrypt($this->email) : "••••••••@••••.com",
+      'is_decrypted' => $show,
+      'avatar' => $this->avatar
+    ];
   }
 }
