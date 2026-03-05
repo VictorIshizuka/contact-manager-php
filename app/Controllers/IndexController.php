@@ -3,14 +3,17 @@
 namespace App\Controllers;
 
 use App\Models\Contact;
-use App\Models\Note;
 
 class IndexController
 {
     public function __invoke()
     {
 
-        $contacts = Contact::all();
+        $search = request()->get('search');
+        $letter = request()->get('letter');
+
+        $contacts = Contact::all($search, $letter);
+
         return view('index', compact('contacts'));
     }
 }

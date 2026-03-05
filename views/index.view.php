@@ -7,18 +7,18 @@
       <a class="btn btn-sm lg:btn-lg text-lime-400 border-lime-400/50 btn-square rounded-2xl hover:text-lime-400 transition-all">
         <i class="ph ph-users-three text-xl lg:text-2xl"></i>
       </a>
-      <a class="btn btn-sm lg:btn-lg btn-ghost btn-square opacity-40 hover:text-lime-400 hover:opacity-100 hover:border-lime-400 hover:shadow-[0_0_15px_rgba(163,230,53,0.3)] rounded-2xl transition-all">
+      <!-- <a class="btn btn-sm lg:btn-lg btn-ghost btn-square opacity-40 hover:text-lime-400 hover:opacity-100 hover:border-lime-400 hover:shadow-[0_0_15px_rgba(163,230,53,0.3)] rounded-2xl transition-all">
         <i class="ph ph-gear text-xl lg:text-2xl"></i>
-      </a>
+      </a> -->
       <a href="/logout" class="btn btn-sm lg:btn-lg btn-ghost btn-square opacity-40 hover:text-lime-400 hover:text-red-400 hover:opacity-100 hover:shadow-[0_0_15px_rgba(163,230,53,0.3)] rounded-2xl transition-all">
         <i class="ph ph-sign-out text-xl lg:text-2xl"></i>
       </a>
     </nav>
 
     <div class="hidden lg:block absolute bottom-4 left-0 w-full text-center px-2">
-      <p class="text-[9px] uppercase tracking-widest opacity-30 font-bold leading-tight truncate">
-        Logado como: >
-        <span class="text-white opacity-80 lowercase font-normal italic truncate block"><?= auth()->email ?></span>
+      <p class="text-[9px] uppercase opacity-30 font-bold leading-tight">
+        Logado como:
+        <span class="text-white opacity-80 lowercase font-normal italic block"><?= auth()->email ?></span>
       </p>
     </div>
   </aside>
@@ -32,7 +32,7 @@
         <div class="flex flex-col sm:flex-row flex-1 items-center gap-4 w-full xl:max-w-3xl justify-end">
           <form id="search-contacts" class="relative w-full sm:flex-1">
             <i class="ph ph-magnifying-glass absolute left-4 top-7 -translate-y-1/2 opacity-50"></i>
-            <input type="text" placeholder="Pesquisar contatos..." class="input input-bordered w-full pl-12 bg-transparent border-white/10 focus:border-lime-400 focus:outline-none transition-all" />
+            <input type="text" name="search" placeholder="Pesquisar contatos..." class="input input-bordered w-full pl-12 bg-transparent border-white/10 focus:border-lime-400 focus:outline-none transition-all" />
           </form>
 
           <div class="flex items-center gap-2 w-full sm:w-auto">
@@ -40,9 +40,16 @@
               <i class="ph ph-plus"></i>
               <span class="inline">Novo</span>
             </button>
-            <button class="btn btn-md btn-square bg-[#303030] border-none rounded-xl hover:text-lime-400 transition-all">
-              <i class="ph ph-lock"></i>
-            </button>
+
+            <?php if (session()->get('show_private_data')): ?>
+              <a href="/contacts/hidden" class="btn btn-md btn-square bg-lime-400 text-white border-none rounded-xl shadow-[0_0_15px_rgba(163,230,53,0.3)]">
+                <i class="ph ph-lock-open"></i>
+              </a>
+            <?php else: ?>
+              <button onclick="openFullUnlock()" class="btn btn-md btn-square bg-[#303030] border-none rounded-xl hover:text-lime-400 transition-all">
+                <i class="ph ph-lock"></i>
+              </button>
+            <?php endif; ?>
           </div>
         </div>
       </div>
@@ -51,20 +58,21 @@
 
         <div class="bg-lime-400 text-[#111111] p-4 flex lg:flex-col justify-start items-center lg:my-6 lg:ml-6 lg:mr-2 lg:rounded-[2rem] overflow-y-auto overflow-x-hidden shadow-xl no-scrollbar flex-none lg:gap-1">
           <?php
+          $currentLetter = $_GET['letter'] ?? '';
           $lyrics = range('A', 'Z');
           foreach ($lyrics as $letter):
-            $active = ($letter == 'C') ? 'text-lg text-[#111111] font-extrabold bg-black/20 rounded-lg scale-110 shadow-inner' : 'text-[#111111]/40 hover:text-[#111111] hover:bg-black/5 rounded-lg font-semibold';
+            $active = ($letter == $currentLetter) ? 'text-lg text-[#111111] font-extrabold bg-black/20 rounded-lg scale-110 shadow-inner' : 'text-[#111111]/40 hover:text-[#111111] hover:bg-black/5 rounded-lg font-semibold';
           ?>
-            <button class="min-w-[40px] lg:min-w-full h-6 w-6 flex flex-none items-center justify-center text-xs transition-all <?= $active ?>">
+            <a href="/contacts?letter=<?= $letter ?>" class="min-w-[40px] lg:min-w-full h-6 w-6 flex flex-none items-center justify-center text-xs transition-all <?= $active ?>">
               <?= $letter ?>
-            </button>
+            </a>
           <?php endforeach; ?>
         </div>
 
         <div class="flex-1 p-4 lg:p-6 flex flex-col min-h-0 min-w-0 overflow-hidden">
           <div class="flex items-center gap-3 mb-4 opacity-40 flex-none">
             <div class="h-[1px] flex-1 bg-white/10"></div>
-            <span class="text-xs font-bold uppercase tracking-widest">Grupo C</span>
+            <span class="text-xs font-bold uppercase tracking-widest">Grupo <?= $currentLetter ?></span>
             <div class="h-[1px] flex-1 bg-white/10"></div>
           </div>
 
@@ -95,15 +103,17 @@
                           </div>
                         </div>
                       </td>
-                      <td class="hidden md:table-cell font-mono text-xs opacity-60 text-center"><?= $c->phone ?></td>
-                      <td class="hidden xl:table-cell text-xs opacity-40 truncate max-w-[150px]"><?= $c->email ?></td>
+                      <td class="hidden md:table-cell font-mono text-xs opacity-60 text-center"><?= $c->phone() ?></td>
+                      <td class="hidden xl:table-cell text-xs opacity-40 truncate max-w-[150px]"><?= $c->email() ?></td>
                       <td class="text-right rounded-r-2xl">
                         <div class="flex justify-end gap-4">
-                          <button onclick='editContact(<?= json_encode($c) ?>)' class="btn btn-xs btn-ghost p-2 hover:text-lime-400 hover:bg-lime-400/10 rounded-xl">
+                          <button onclick='editContact(<?= json_encode($c->toArray()) ?>)' class="btn btn-xs btn-ghost p-2 hover:text-lime-400 hover:bg-lime-400/10 rounded-xl">
                             <i class="ph ph-pencil-simple text-base"></i>
                           </button>
-                          <button class="btn btn-xs btn-ghost p-2 hover:text-lime-400 hover:bg-lime-400/10 rounded-xl">
-                            <i class="ph ph-lock text-base"></i>
+                          <button onclick="toggleReveal(<?= $c->id ?>, this)"
+                            data-revealed="<?= session()->get('show_private_data') ? 'true' : 'false' ?>"
+                            class="btn btn-xs btn-ghost p-2 hover:text-lime-400 hover:bg-lime-400/10 rounded-xl">
+                            <i id="lock-icon-<?= $c->id ?>" class="ph <?= session()->get('show_private_data') ? 'ph-lock-open-fill text-lime-400' : 'ph-lock' ?> text-base"></i>
                           </button>
                           <button onclick="deleteContact(<?= $c->id ?>, '<?= $c->name ?>')" class="btn btn-xs btn-ghost p-2 hover:text-red-400 hover:bg-red-400/10 rounded-xl">
                             <i class="ph ph-trash text-base"></i>
@@ -113,7 +123,14 @@
                     </tr>
                   <?php endforeach; ?>
                 <?php } else { ?>
-                  <span>Sem registros no momento.</span>
+                  <tr>
+                    <td colspan="4" class="py-20 text-center opacity-30">
+                      <div class="flex flex-col items-center gap-2">
+                        <i class="ph ph-users-three text-5xl"></i>
+                        <span class="font-bold tracking-widest uppercase text-xs">Nenhum contato encontrado</span>
+                      </div>
+                    </td>
+                  </tr>
                 <?php } ?>
               </tbody>
             </table>
@@ -124,6 +141,7 @@
   </main>
 
   <?php require base_path('/views/components/modal-form.php') ?>
+  <?php require base_path('/views/components/modal-confirm.php') ?>
 
   <style>
     /* Remove a barra de rolagem visualmente mas mantém o scroll funcional */
