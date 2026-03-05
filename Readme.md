@@ -4,9 +4,15 @@ Uma aplicação de gerenciamento de contatos desenvolvida em PHP, agora atualiza
 
 > Este projeto evoluiu do lock-contact-php para um sistema dinâmico que utiliza chamadas assíncronas e criptografia de dados.
 
+![1772726648302](image/Readme/1772726648302.png)
+
+![1772726661397](image/Readme/1772726661397.png)
+
+![1772727013120](image/Readme/1772727013120.png)![1772727030848](image/Readme/1772727030848.png)
+
 ---
 
-## ✨ Funcionalidades
+![1772727049665](image/Readme/1772727049665.png)## ✨ Funcionalidades
 
 * **Autenticação Completa:** Sistema de login e registro com Middlewares de proteção (`Auth` e `Guest`).
 * **Gestão de Contatos (CRUD):** Criação, leitura, edição e exclusão de contatos.
