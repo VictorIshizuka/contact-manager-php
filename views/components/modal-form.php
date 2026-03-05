@@ -25,17 +25,17 @@
 
       <div class="form-control">
         <label class="label"><span class="label-text opacity-60">Nome</span></label>
-        <input type="text" name="name" placeholder="Nome completo" class="input input-bordered pl-2 w-full bg-black/20 border-white/10 focus:border-lime-400" required />
+        <input type="text" name="name" placeholder="Nome completo" class="input input-bordered pl-2 w-full bg-black/20 border-white/10 focus:border-lime-400"  />
       </div>
 
       <div class="form-control">
         <label class="label"><span class="label-text opacity-60">Telefone</span></label>
-        <input type="text" name="phone" placeholder="(99) 99999-9999" class="input input-bordered pl-2 w-full bg-black/20 border-white/10 focus:border-lime-400" required />
+        <input type="text" name="phone" placeholder="(99) 99999-9999" class="input input-bordered pl-2 w-full bg-black/20 border-white/10 focus:border-lime-400"  />
       </div>
 
       <div class="form-control">
         <label class="label"><span class="label-text opacity-60">E-mail</span></label>
-        <input type="email" name="email" placeholder="email@exemplo.com" class="input input-bordered pl-2 w-full bg-black/20 border-white/10 focus:border-lime-400" required />
+        <input type="email" name="email" placeholder="email@exemplo.com" class="input input-bordered pl-2 w-full bg-black/20 border-white/10 focus:border-lime-400"  />
       </div>
 
       <div class="modal-action flex gap-2">
