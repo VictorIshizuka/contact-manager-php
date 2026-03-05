@@ -1,4 +1,4 @@
-<dialog id="modal_settings" class="modal">
+<dialog id="modal_settings" class="modal modal-bottom sm:modal-middle rounded-xl backdrop-blur-sm">
   <div class="modal-box bg-base-100 border border-white/5 p-0 overflow-hidden max-w-md">
 
     <div class="p-6 border-b border-white/5 flex justify-between items-center">
