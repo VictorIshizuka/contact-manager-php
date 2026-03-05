@@ -12,6 +12,7 @@ class Database
     {
 
         $this->db = new PDO($this->getDsn($config));
+        $this->db->exec('PRAGMA foreign_keys = ON;');
     }
 
     private function getDsn($config)
@@ -21,11 +22,11 @@ class Database
 
         unset($config['driver']);
 
-        $dsn = $driver.':'.http_build_query($config, '', ';');
+        $dsn = $driver . ':' . http_build_query($config, '', ';');
 
         if ($driver == 'sqlite') {
 
-            $dsn = $driver.':'.$config['database'];
+            $dsn = $driver . ':' . $config['database'];
         }
 
         return $dsn;

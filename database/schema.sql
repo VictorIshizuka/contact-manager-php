@@ -16,3 +16,6 @@ created_at DATETIME,
 updated_at DATETIME,
 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+DELETE FROM contacts;
+DELETE FROM users;
