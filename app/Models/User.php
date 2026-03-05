@@ -38,4 +38,14 @@ class User
             ]
         );
     }
+
+    public static function update() {}
+    public static function delete($id)
+    {
+        $database = new Database(config('database'));
+        return $database->query(
+            'DELETE FROM users WHERE id = :id',
+            params: compact('id')
+        );
+    }
 }

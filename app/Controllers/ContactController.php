@@ -152,6 +152,14 @@ class ContactController
     $id = request()->post('reveal_id');
     $password = request()->post('password');
 
+    $validation = Validation::validate([
+      'password' => ['required'],
+    ], request()->all());
+
+    if ($validation->isInvalid()) {
+      return json(['success' => false, 'errors' => $validation->errors()], 422);
+    }
+
     if (!password_verify($password, auth()->password)) {
       return json(['success' => false, 'message' => 'Senha incorreta!'], 403);
     }

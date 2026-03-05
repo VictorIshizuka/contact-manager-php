@@ -181,3 +181,8 @@ function env($key, $default)
 
     return isset($env[$key]) ? $env[$key] : $default;
 }
+
+function logout()
+{
+    session_destroy();
+}

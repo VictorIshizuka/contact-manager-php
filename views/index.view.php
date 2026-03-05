@@ -7,9 +7,9 @@
       <a class="btn btn-sm lg:btn-lg text-lime-400 border-lime-400/50 btn-square rounded-2xl hover:text-lime-400 transition-all">
         <i class="ph ph-users-three text-xl lg:text-2xl"></i>
       </a>
-      <!-- <a class="btn btn-sm lg:btn-lg btn-ghost btn-square opacity-40 hover:text-lime-400 hover:opacity-100 hover:border-lime-400 hover:shadow-[0_0_15px_rgba(163,230,53,0.3)] rounded-2xl transition-all">
+      <a onclick="modal_settings.showModal()" class="btn btn-sm lg:btn-lg btn-ghost btn-square opacity-40 hover:text-lime-400 hover:opacity-100 hover:border-lime-400 hover:shadow-[0_0_15px_rgba(163,230,53,0.3)] rounded-2xl transition-all">
         <i class="ph ph-gear text-xl lg:text-2xl"></i>
-      </a> -->
+      </a>
       <a href="/logout" class="btn btn-sm lg:btn-lg btn-ghost btn-square opacity-40 hover:text-lime-400 hover:text-red-400 hover:opacity-100 hover:shadow-[0_0_15px_rgba(163,230,53,0.3)] rounded-2xl transition-all">
         <i class="ph ph-sign-out text-xl lg:text-2xl"></i>
       </a>
@@ -142,6 +142,7 @@
 
   <?php require base_path('/views/components/modal-form.php') ?>
   <?php require base_path('/views/components/modal-confirm.php') ?>
+  <?php require base_path('/views/components/modal-settings.php') ?>
 
   <style>
     /* Remove a barra de rolagem visualmente mas mantém o scroll funcional */

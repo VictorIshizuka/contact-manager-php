@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput: document.querySelector('input[name="search"]')
   };
 
+  elements.confirmInput?.addEventListener('input', () => ui.clearError(elements.confirmInput));
+
   // --- 2. AUXILIARES DE INTERFACE (UI) ---
   const ui = {
     setError: (input, message) => {
@@ -104,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.resetForm(confirmForm);
     elements.revealIdInput.value = id;
     confirmForm.action = "/contacts/reveal";
+    document.getElementById('confirm-form-method').value = "POST";
     modal_confirm.showModal();
   };
 
@@ -111,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.resetForm(confirmForm);
     elements.revealIdInput.value = "";
     confirmForm.action = "/contacts/show";
+    document.getElementById('confirm-form-method').value = "POST";
     modal_confirm.showModal();
   };
 
@@ -122,6 +126,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const res = await fetch('/contacts/delete', { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
     if ((await res.json()).success) window.location.reload();
+  };
+
+  window.confirmDeleteAccount = () => {
+
+    ui.resetForm(confirmForm);
+    elements.revealIdInput.value = "DELETE_ACCOUNT";
+    confirmForm.action = "/user/delete";
+    document.getElementById('confirm-form-method').value = "DELETE";
+
+    document.querySelector('#modal_confirm h3').innerHTML =
+      '<span class="text-red-500 flex items-center gap-2"><i class="ph ph-warning"></i> Confirmar Exclusão</span>';
+
+    modal_settings.close();
+    modal_confirm.showModal();
   };
 
   // --- 4. EVENTOS ---
@@ -150,39 +168,75 @@ document.addEventListener('DOMContentLoaded', () => {
   // Confirmação de Senha
   confirmForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const res = await fetch(confirmForm.action, {
-      method: 'POST',
-      body: new FormData(confirmForm),
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    });
-    const result = await res.json();
 
-    if (res.ok) {
-      if (elements.revealIdInput.value) {
-        const id = elements.revealIdInput.value;
-        const btnLock = document.querySelector(`button[onclick*="toggleReveal(${id}"]`);
-        const row = btnLock.closest('tr');
-        const btnEdit = row.querySelector('button[onclick*="editContact"]');
+    ui.clearError(elements.confirmInput);
 
-        row.querySelector('td:nth-child(2)').innerText = result.phone;
-        row.querySelector('td:nth-child(3)').innerText = result.email;
-        btnLock.querySelector('i').className = 'ph-lock-open-fill text-lime-400';
-        btnLock.setAttribute('data-revealed', 'true');
+    try {
+      const res = await fetch(confirmForm.action, {
+        method: 'POST',
+        body: new FormData(confirmForm),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
 
-        const data = JSON.parse(btnEdit.getAttribute('onclick').match(/editContact\((.*)\)/)[1]);
-        data.phone = result.phone;
-        data.email = result.email;
-        data.is_decrypted = true;
-        btnEdit.setAttribute('onclick', `editContact(${JSON.stringify(data)})`);
-        modal_confirm.close();
+      // Tentamos ler o JSON. Se o PHP der erro catastrófico, o catch trata.
+      const result = await res.json();
+
+      if (res.ok) {
+        const revealId = elements.revealIdInput.value;
+
+        // Caso 1: Exclusão de conta
+        if (revealId === "DELETE_ACCOUNT") {
+          alert("Sua conta foi excluída com sucesso.");
+          window.location.href = "/logout";
+          return;
+        }
+
+        // Caso 2: Revelar um contato específico
+        if (revealId) {
+          const btnLock = document.querySelector(`button[onclick*="toggleReveal(${revealId}"]`);
+          const row = btnLock.closest('tr');
+          const btnEdit = row.querySelector('button[onclick*="editContact"]');
+
+          row.querySelector('td:nth-child(2)').innerText = result.phone;
+          row.querySelector('td:nth-child(3)').innerText = result.email;
+
+          const icon = btnLock.querySelector('i');
+          icon.className = 'ph-lock-open-fill text-base text-lime-400';
+          btnLock.setAttribute('data-revealed', 'true');
+
+          // Atualiza o JSON no botão de edição para liberar os campos
+          const match = btnEdit.getAttribute('onclick').match(/editContact\((.*)\)/);
+          if (match) {
+            const data = JSON.parse(match[1]);
+            data.phone = result.phone;
+            data.email = result.email;
+            data.is_decrypted = true;
+            btnEdit.setAttribute('onclick', `editContact(${JSON.stringify(data)})`);
+          }
+
+          modal_confirm.close();
+        } else {
+          // Caso 3: Desbloqueio global (recarrega a página para aplicar a sessão)
+          window.location.reload();
+        }
       } else {
-        window.location.reload();
+        // Se caiu aqui, é 422 ou 403
+        let errorMsg = "Erro desconhecido";
+
+        if (result.errors && result.errors.password) {
+          errorMsg = Array.isArray(result.errors.password) ? result.errors.password[0] : result.errors.password;
+        } else if (result.message) {
+          errorMsg = result.message;
+        }
+
+        // ESTA LINHA ESTAVA FALTANDO:
+        ui.setError(elements.confirmInput, errorMsg);
       }
-    } else {
-      ui.setError(elements.confirmInput, result.message || "Senha incorreta");
+    } catch (error) {
+      // console.error(error);
+      ui.setError(elements.confirmInput, "Erro ao processar solicitação no servidor.");
     }
   });
-
   // Pesquisa com Debounce
   let searchTimeout;
   elements.searchInput?.addEventListener('input', (e) => {

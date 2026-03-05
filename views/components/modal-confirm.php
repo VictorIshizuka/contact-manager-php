@@ -5,10 +5,10 @@
 
     <form id="form-confirm-password" action="/contacts/show" method="POST" class="space-y-4">
       <input type="hidden" name="reveal_id" id="reveal-id" value="">
+      <input type="hidden" name="__method" id="confirm-form-method" value="POST">
 
       <div class="form-control">
         <input type="password" name="password" id="confirm-password-input" placeholder="Sua senha mestre"
-
           class="input input-bordered pl-4 w-full bg-black/20 border-white/10 focus:border-lime-400" />
       </div>
 

@@ -1,7 +1,7 @@
 <dialog id="modal_contact" class="modal modal-bottom sm:modal-middle rounded-xl backdrop-blur-sm">
   <div class="modal-box bg-[#1a1a1a] border border-white/10 max-w-md">
     <form method="dialog">
-      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-4">✕</button>
     </form>
 
     <h3 id="modal-title" class="font-bold text-lg mb-6">Adicionar contato</h3>
